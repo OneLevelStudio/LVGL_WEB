@@ -96,9 +96,10 @@ int main(int argc, char **argv)
     lv_obj_set_height(menu_header, 30);
     lv_obj_set_style_bg_color(menu_header, lv_color_hex(0xc6c7b7), 0);
     lv_obj_set_style_bg_opa(menu_header, LV_OPA_COVER, 0);
-    lv_obj_set_style_text_color(menu_header, lv_color_hex(0x008a7a), 0);
+    lv_obj_set_style_text_color(menu_header, lv_palette_main(LV_PALETTE_TEAL), 0);
     lv_obj_set_style_border_side(menu_header, LV_BORDER_SIDE_BOTTOM, 0);
     lv_obj_set_style_border_width(menu_header, 2, 0);
+    lv_obj_set_style_border_color(menu_header, lv_palette_main(LV_PALETTE_TEAL), 0);
 
     lv_obj_t *menu_back_btn = lv_menu_get_main_header_back_button(obj_menu);
     lv_obj_t *menu_back_btn_text = lv_label_create(menu_back_btn);

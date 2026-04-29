@@ -6,4 +6,6 @@ sudo apt update && sudo apt install -y python3.12-venv cmake libsdl2-2.0-0 libsd
 . emsdk/emsdk_env.sh && cd LVGL_WEB/cmbuild && emmake make -j4
 
 . emsdk/emsdk_env.sh && rm -rf LVGL_WEB/cmbuild && cd LVGL_WEB && mkdir cmbuild && cd cmbuild && emcmake cmake .. && emmake make -j4
+
+emmake make -j4
 ```

@@ -89,14 +89,14 @@ int main(int argc, char **argv)
 
     lv_obj_t *obj_menu = lv_menu_create(lv_screen_active());
     lv_obj_set_size(obj_menu, 240, 320);
-    // lv_obj_set_style_bg_color(obj_menu, lv_palette_lighten(LV_PALETTE_GREY, 1), 0);
-    // lv_obj_set_style_bg_opa(obj_menu, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_color(obj_menu, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_bg_opa(obj_menu, LV_OPA_COVER, 0);
 
     lv_obj_t *menu_header = lv_menu_get_main_header(obj_menu);
     lv_obj_set_height(menu_header, 30);
-    lv_obj_set_style_bg_color(menu_header, lv_palette_lighten(LV_PALETTE_GREY, 1), 0);
+    lv_obj_set_style_bg_color(menu_header, lv_color_hex(0xc6c7b7), 0);
     lv_obj_set_style_bg_opa(menu_header, LV_OPA_COVER, 0);
-    lv_obj_set_style_text_color(menu_header, lv_color_black(), 0);
+    lv_obj_set_style_text_color(menu_header, lv_color_hex(0x008a7a), 0);
     lv_obj_set_style_border_side(menu_header, LV_BORDER_SIDE_BOTTOM, 0);
     lv_obj_set_style_border_width(menu_header, 2, 0);
 
@@ -115,11 +115,11 @@ int main(int argc, char **argv)
     // obj_resulttext
     obj_resulttext = lv_textarea_create(obj_cont);
     lv_textarea_set_placeholder_text(obj_resulttext, "Result here...");
-    lv_obj_set_size(obj_resulttext, lv_pct(100), 76);
+    lv_obj_set_size(obj_resulttext, lv_pct(100), 72);
     // obj_textinput
     obj_textinput = lv_textarea_create(obj_cont);
     lv_textarea_set_placeholder_text(obj_textinput, "Tap here to type...");
-    lv_obj_set_size(obj_textinput, lv_pct(100), 36);
+    lv_obj_set_size(obj_textinput, lv_pct(100), 40);
     lv_obj_add_event_cb(obj_textinput, fn_textinput_eventcb, LV_EVENT_ALL, NULL);
     // obj_keyboard
     obj_keyboard = lv_keyboard_create(lv_screen_active());

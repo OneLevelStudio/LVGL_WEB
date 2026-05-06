@@ -289,7 +289,6 @@ int main(int argc, char **argv)
     obj_wifiscan_listwifi_cont = lv_menu_cont_create(obj_page_wifiscan);
     lv_obj_set_flex_flow(obj_wifiscan_listwifi_cont, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_height(obj_wifiscan_listwifi_cont, 209);
-    lv_obj_set_style_margin_hor(obj_wifiscan_listwifi_cont, 8, 0);
     lv_obj_set_style_bg_color(obj_wifiscan_listwifi_cont, lv_color_hex(0x808080), 0);
     lv_obj_set_style_bg_opa(obj_wifiscan_listwifi_cont, LV_OPA_COVER, 0);
     lv_obj_set_style_border_width(obj_wifiscan_listwifi_cont, size_borderwidth, 0);

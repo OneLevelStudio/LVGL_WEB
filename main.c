@@ -35,25 +35,41 @@ static lv_obj_t *obj_menu;
 static lv_style_t style_buttonlarge;
 static lv_style_t style_buttonsmall;
 
+#define color_header_background 0x000000
+#define color_header_titletext 0xffffff
+#define color_header_backtext 0x808080
+#define color_header_border 0xffffff
+#define color_global_background 0x000000
+#define color_btnlarge_background 0x000000
+#define color_btnlarge_border 0xffffff
+#define color_btnlarge_text 0xffffff
+#define color_btnsmall_background 0x000000
+#define color_btnsmall_border 0xffffff
+#define color_btnsmall_text 0xffffff
+#define size_borderwidth 2
+#define size_borderradius 4
+
 void init_styles(void)
 {
     lv_style_init(&style_buttonlarge);
-    lv_style_set_radius(&style_buttonlarge, 0);
+    lv_style_set_radius(&style_buttonlarge, size_borderradius);
     lv_style_set_width(&style_buttonlarge, lv_pct(100));
     lv_style_set_pad_ver(&style_buttonlarge, 15);
     lv_style_set_bg_opa(&style_buttonlarge, LV_OPA_COVER);
-    lv_style_set_bg_color(&style_buttonlarge, lv_color_hex(0x808080));
-    lv_style_set_border_width(&style_buttonlarge, 2);
-    lv_style_set_border_color(&style_buttonlarge, lv_color_hex(0xababab));
+    lv_style_set_bg_color(&style_buttonlarge, lv_color_hex(color_btnlarge_background));
+    lv_style_set_border_width(&style_buttonlarge, size_borderwidth);
+    lv_style_set_border_color(&style_buttonlarge, lv_color_hex(color_btnlarge_border));
+    lv_style_set_text_color(&style_buttonlarge, lv_color_hex(color_btnlarge_text));
 
     lv_style_init(&style_buttonsmall);
-    lv_style_set_radius(&style_buttonsmall, 0);
+    lv_style_set_radius(&style_buttonsmall, size_borderradius);
     lv_style_set_width(&style_buttonsmall, lv_pct(100));
     // lv_style_set_pad_ver(&style_buttonsmall, 15);
     lv_style_set_bg_opa(&style_buttonsmall, LV_OPA_COVER);
-    lv_style_set_bg_color(&style_buttonsmall, lv_color_hex(0x808080));
-    lv_style_set_border_width(&style_buttonsmall, 2);
-    lv_style_set_border_color(&style_buttonsmall, lv_color_hex(0xababab));
+    lv_style_set_bg_color(&style_buttonsmall, lv_color_hex(color_btnsmall_background));
+    lv_style_set_border_width(&style_buttonsmall, size_borderwidth);
+    lv_style_set_border_color(&style_buttonsmall, lv_color_hex(color_btnsmall_border));
+    lv_style_set_text_color(&style_buttonsmall, lv_color_hex(color_btnsmall_text));
 }
 
 // ---------- Page 1 ----------
@@ -82,10 +98,10 @@ static void fn_textinput_eventcb(lv_event_t *evt)
 }
 
 // ---------- Page 2 ----------
-static lv_obj_t *obj_btn_scanaps_label;
-static lv_obj_t *obj_scanaps_list;
-static lv_obj_t *obj_scanaps_infopage;
-static lv_obj_t *obj_scanaps_info_cont_label;
+static lv_obj_t *obj_wifiscan_btnscan_label;
+static lv_obj_t *obj_wifiscan_listwifi_cont;
+static lv_obj_t *obj_page_wifiscan_wifiinfo;
+static lv_obj_t *obj_wifiscan_wifiinfo_label;
 // static const char *get_wifi_encryption_type(wifi_auth_mode_t auth_mode)
 // {
 //     switch (auth_mode)
@@ -130,10 +146,10 @@ static void fn_apdetailpage_eventcb(lv_event_t *evt)
     snprintf(strbuf, sizeof(strbuf), "SSID: WiFi Network #%d\nRSSI: 12345 dBm\nChannel: 123\nBSSID: 12-34-56-78-89\nEncryption Type: ABC", idx);
     // // --------------------------------------------------
 
-    lv_label_set_text(obj_scanaps_info_cont_label, strbuf);
-    if (obj_menu && obj_scanaps_infopage)
+    lv_label_set_text(obj_wifiscan_wifiinfo_label, strbuf);
+    if (obj_menu && obj_page_wifiscan_wifiinfo)
     {
-        lv_menu_set_page(obj_menu, obj_scanaps_infopage);
+        lv_menu_set_page(obj_menu, obj_page_wifiscan_wifiinfo);
     }
 }
 static void fn_scanaps_eventcb(lv_event_t *evt)
@@ -142,8 +158,8 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
     // obj_btn_scanaps clicked
     if (evt_code == LV_EVENT_CLICKED)
     {
-        lv_obj_clean(obj_scanaps_list);
-        lv_label_set_text(obj_btn_scanaps_label, "Scanning...");
+        lv_obj_clean(obj_wifiscan_listwifi_cont);
+        lv_label_set_text(obj_wifiscan_btnscan_label, "Scanning...");
         lv_refr_now(NULL);
 
         // // --------------------------------------------------
@@ -153,12 +169,12 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
         // int n_aps = WiFi.scanNetworks(false, true); // (async, show_hidden)
         // if (n_aps < 0)
         // {
-        //     lv_label_set_text(obj_btn_scanaps_label, "Status: Failed");
+        //     lv_label_set_text(obj_wifiscan_btnscan_label, "Status: Failed");
         //     return;
         // }
         // for (int idx = 0; idx < n_aps; ++idx)
         // {
-        //     lv_obj_t *obj_btn_item_ap = lv_btn_create(obj_scanaps_list);
+        //     lv_obj_t *obj_btn_item_ap = lv_btn_create(obj_wifiscan_listwifi_cont);
         //     lv_obj_add_style(obj_btn_item_ap, &style_buttonsmall, LV_PART_MAIN | LV_STATE_DEFAULT);
         //     lv_obj_t *obj_btn_item_ap_label = lv_label_create(obj_btn_item_ap);
         //     char strbuf[96];
@@ -171,7 +187,7 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
         int n_aps = 10;
         for (int idx = 0; idx < n_aps; ++idx)
         {
-            lv_obj_t *obj_btn_item_ap = lv_btn_create(obj_scanaps_list);
+            lv_obj_t *obj_btn_item_ap = lv_btn_create(obj_wifiscan_listwifi_cont);
             lv_obj_add_style(obj_btn_item_ap, &style_buttonsmall, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_t *obj_btn_item_ap_label = lv_label_create(obj_btn_item_ap);
             char strbuf[96];
@@ -183,7 +199,7 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
 
         char strbuf[64];
         snprintf(strbuf, sizeof(strbuf), "Status: %d AP(s) found", n_aps);
-        lv_label_set_text(obj_btn_scanaps_label, strbuf);
+        lv_label_set_text(obj_wifiscan_btnscan_label, strbuf);
     }
 }
 
@@ -225,102 +241,104 @@ int main(int argc, char **argv)
     lv_obj_t *obj_cont;
     lv_obj_t *obj_text;
 
+    // ----- Menu & Header -----
     obj_menu = lv_menu_create(lv_scr_act());
     lv_obj_set_size(obj_menu, 240, 320);
-    lv_obj_set_style_bg_color(obj_menu, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_bg_color(obj_menu, lv_color_hex(color_global_background), 0);
     lv_obj_set_style_bg_opa(obj_menu, LV_OPA_COVER, 0);
-
     lv_obj_t *menu_header = lv_menu_get_main_header(obj_menu);
     lv_obj_set_height(menu_header, 36);
-    lv_obj_set_style_bg_color(menu_header, lv_color_hex(0x222222), 0);
+    lv_obj_set_style_bg_color(menu_header, lv_color_hex(color_header_background), 0);
     lv_obj_set_style_bg_opa(menu_header, LV_OPA_COVER, 0);
-    lv_obj_set_style_text_color(menu_header, lv_palette_main(LV_PALETTE_LIGHT_GREEN), 0);
+    lv_obj_set_style_text_color(menu_header, lv_color_hex(color_header_titletext), 0);
     lv_obj_set_style_border_side(menu_header, LV_BORDER_SIDE_BOTTOM, 0);
-    lv_obj_set_style_border_width(menu_header, 2, 0);
-    lv_obj_set_style_border_color(menu_header, lv_palette_main(LV_PALETTE_TEAL), 0);
-
+    lv_obj_set_style_border_width(menu_header, size_borderwidth, 0);
+    lv_obj_set_style_border_color(menu_header, lv_color_hex(color_header_border), 0);
     lv_obj_t *menu_back_btn = lv_menu_get_main_header_back_btn(obj_menu);
-    lv_obj_set_style_pad_hor(menu_back_btn, 4, 0);
+    lv_obj_set_style_pad_hor(menu_back_btn, 0, 0);
     lv_obj_set_style_pad_ver(menu_back_btn, 6, 0);
+    lv_obj_t *arrow_label = lv_obj_get_child(menu_back_btn, 0);
+    lv_obj_set_style_text_color(arrow_label, lv_color_hex(color_header_backtext), 0);
     lv_obj_t *menu_back_btn_text = lv_label_create(menu_back_btn);
     lv_label_set_text(menu_back_btn_text, "Back");
+    lv_obj_set_style_text_color(menu_back_btn_text, lv_color_hex(color_header_backtext), 0);
 
-    // ----- Page 1 -----
-    lv_obj_t *obj_subpage_1 = lv_menu_page_create(obj_menu, "Page 1");
-    obj_cont = lv_menu_cont_create(obj_subpage_1);
+    // ----- Page: WiFi Scan -----
+    lv_obj_t *obj_page_wifiscan = lv_menu_page_create(obj_menu, "WiFi Scan");
+    obj_cont = lv_menu_cont_create(obj_page_wifiscan);
+    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
+    lv_obj_t *obj_btn_scanaps = lv_btn_create(obj_cont);
+    lv_obj_add_style(obj_btn_scanaps, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_wifiscan_btnscan_label = lv_label_create(obj_btn_scanaps);
+    lv_label_set_text(obj_wifiscan_btnscan_label, "Start scanning APs");
+    lv_obj_add_event_cb(obj_btn_scanaps, fn_scanaps_eventcb, LV_EVENT_ALL, NULL);
+    obj_wifiscan_listwifi_cont = lv_menu_cont_create(obj_page_wifiscan);
+    lv_obj_set_flex_flow(obj_wifiscan_listwifi_cont, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_height(obj_wifiscan_listwifi_cont, 209);
+    lv_obj_set_style_margin_hor(obj_wifiscan_listwifi_cont, 8, 0);
+    lv_obj_set_style_bg_color(obj_wifiscan_listwifi_cont, lv_color_hex(0x808080), 0);
+    lv_obj_set_style_bg_opa(obj_wifiscan_listwifi_cont, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_width(obj_wifiscan_listwifi_cont, size_borderwidth, 0);
+    lv_obj_set_style_border_color(obj_wifiscan_listwifi_cont, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_border_side(obj_wifiscan_listwifi_cont, LV_BORDER_SIDE_FULL, 0);
+    lv_obj_set_style_border_opa(obj_wifiscan_listwifi_cont, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(obj_wifiscan_listwifi_cont, size_borderradius, 0);
+    obj_page_wifiscan_wifiinfo = lv_menu_page_create(obj_menu, "AP Info");
+    lv_obj_t *obj_scanaps_info_cont = lv_menu_cont_create(obj_page_wifiscan_wifiinfo);
+    lv_obj_set_flex_flow(obj_scanaps_info_cont, LV_FLEX_FLOW_COLUMN);
+    obj_wifiscan_wifiinfo_label = lv_label_create(obj_scanaps_info_cont);
+    lv_obj_set_width(obj_wifiscan_wifiinfo_label, lv_pct(100));
+    lv_label_set_long_mode(obj_wifiscan_wifiinfo_label, LV_LABEL_LONG_WRAP);
+    lv_label_set_text(obj_wifiscan_wifiinfo_label, "AP info should be here");
+
+    // ----- Page: Keyboard Test -----
+    lv_obj_t *obj_page_keyboardtest = lv_menu_page_create(obj_menu, "Keyboard Test");
+    obj_cont = lv_menu_cont_create(obj_page_keyboardtest);
     lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(obj_cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_pad_row(obj_cont, 6, 0);
     lv_obj_set_style_pad_ver(obj_cont, 6, 0);
     lv_obj_set_style_pad_hor(obj_cont, 8, 0);
-    // obj_resulttext
     obj_resulttext = lv_textarea_create(obj_cont);
     lv_textarea_set_placeholder_text(obj_resulttext, "Result here...");
     lv_obj_set_size(obj_resulttext, lv_pct(100), 70);
-    // obj_textinput
     obj_textinput = lv_textarea_create(obj_cont);
     lv_textarea_set_placeholder_text(obj_textinput, "Tap here to type...");
     lv_obj_set_size(obj_textinput, lv_pct(100), 36);
     lv_obj_add_event_cb(obj_textinput, fn_textinput_eventcb, LV_EVENT_ALL, NULL);
-    // obj_keyboard
     obj_keyboard = lv_keyboard_create(lv_scr_act());
-    lv_obj_add_flag(obj_keyboard, LV_OBJ_FLAG_HIDDEN); // Hide obj_keyboard by default
+    lv_obj_add_flag(obj_keyboard, LV_OBJ_FLAG_HIDDEN); // Hide keyboard by default
     lv_keyboard_set_textarea(obj_keyboard, obj_textinput);
 
-    // ----- Page 2 -----
-    lv_obj_t *obj_subpage_2 = lv_menu_page_create(obj_menu, "Scan APs");
-    obj_cont = lv_menu_cont_create(obj_subpage_2);
-    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
-    // obj_btn_scanaps
-    lv_obj_t *obj_btn_scanaps = lv_btn_create(obj_cont);
-    lv_obj_add_style(obj_btn_scanaps, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
-    obj_btn_scanaps_label = lv_label_create(obj_btn_scanaps);
-    lv_label_set_text(obj_btn_scanaps_label, "Start scanning APs");
-    lv_obj_add_event_cb(obj_btn_scanaps, fn_scanaps_eventcb, LV_EVENT_ALL, NULL);
-    // obj_scanaps_list
-    obj_scanaps_list = lv_menu_cont_create(obj_subpage_2);
-    lv_obj_set_flex_flow(obj_scanaps_list, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_height(obj_scanaps_list, 210);
-    // obj_scanaps_infopage
-    obj_scanaps_infopage = lv_menu_page_create(obj_menu, "AP Info");
-    lv_obj_t *obj_scanaps_info_cont = lv_menu_cont_create(obj_scanaps_infopage);
-    lv_obj_set_flex_flow(obj_scanaps_info_cont, LV_FLEX_FLOW_COLUMN);
-    obj_scanaps_info_cont_label = lv_label_create(obj_scanaps_info_cont);
-    lv_obj_set_width(obj_scanaps_info_cont_label, lv_pct(100));
-    lv_label_set_long_mode(obj_scanaps_info_cont_label, LV_LABEL_LONG_WRAP);
-    lv_label_set_text(obj_scanaps_info_cont_label, "AP info should be here.");
-
-    // ----- Page 3 -----
-    lv_obj_t *obj_subpage_3 = lv_menu_page_create(obj_menu, "Page 3");
-    obj_cont = lv_menu_cont_create(obj_subpage_3);
+    // ----- Page: About Firmware -----
+    lv_obj_t *obj_page_about = lv_menu_page_create(obj_menu, "About Firmware");
+    obj_cont = lv_menu_cont_create(obj_page_about);
     obj_text = lv_label_create(obj_cont);
-    lv_label_set_text(obj_text, "This is the content of page 3");
+    lv_obj_set_width(obj_text, lv_pct(100));
+    lv_label_set_long_mode(obj_text, LV_LABEL_LONG_WRAP);
+    lv_label_set_text(obj_text, "Firmware V1.0");
 
-    // ----- Main page -----
-    lv_obj_t *main_page = lv_menu_page_create(obj_menu, HARDWARE);
-    lv_obj_set_style_pad_ver(main_page, 8, 0);
-    lv_obj_set_style_pad_hor(main_page, 8, 0);
-    lv_obj_set_style_pad_row(main_page, 8, LV_PART_MAIN);
-
-    obj_cont = lv_btn_create(main_page);
+    // ----- Page: Main page -----
+    lv_obj_t *obj_page_main = lv_menu_page_create(obj_menu, HARDWARE);
+    lv_obj_set_style_pad_ver(obj_page_main, 8, 0);
+    lv_obj_set_style_pad_hor(obj_page_main, 8, 0);
+    lv_obj_set_style_pad_row(obj_page_main, 8, LV_PART_MAIN);
+    obj_cont = lv_btn_create(obj_page_main);
     lv_obj_add_style(obj_cont, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     obj_text = lv_label_create(obj_cont);
-    lv_label_set_text(obj_text, "Page 1 - Test Keyboard");
-    lv_menu_set_load_page_event(obj_menu, obj_cont, obj_subpage_1);
-
-    obj_cont = lv_btn_create(main_page);
+    lv_label_set_text(obj_text, "WiFi Scan");
+    lv_menu_set_load_page_event(obj_menu, obj_cont, obj_page_wifiscan);
+    obj_cont = lv_btn_create(obj_page_main);
     lv_obj_add_style(obj_cont, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     obj_text = lv_label_create(obj_cont);
-    lv_label_set_text(obj_text, "Page 2 - Scan APs");
-    lv_menu_set_load_page_event(obj_menu, obj_cont, obj_subpage_2);
-
-    obj_cont = lv_btn_create(main_page);
+    lv_label_set_text(obj_text, "Keyboard Test");
+    lv_menu_set_load_page_event(obj_menu, obj_cont, obj_page_keyboardtest);
+    obj_cont = lv_btn_create(obj_page_main);
     lv_obj_add_style(obj_cont, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     obj_text = lv_label_create(obj_cont);
-    lv_label_set_text(obj_text, "Page 3 - None");
-    lv_menu_set_load_page_event(obj_menu, obj_cont, obj_subpage_3);
-
-    lv_menu_set_page(obj_menu, main_page);
+    lv_label_set_text(obj_text, "About Firmware");
+    lv_menu_set_load_page_event(obj_menu, obj_cont, obj_page_about);
+    lv_menu_set_page(obj_menu, obj_page_main);
     // ====================================================================================================
     // ====================================================================================================
     // ====================================================================================================

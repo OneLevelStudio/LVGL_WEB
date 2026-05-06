@@ -95,19 +95,19 @@ static void fn_apdetailpage_eventcb(lv_event_t *evt)
 
     // // --------------------------------------------------
     // uint8_t *bssid = WiFi.BSSID(idx);
-    // char bssidStr[18] = "";
+    // char strbuf_bssid[18] = "";
     // if (bssid)
     // {
-    //     snprintf(bssidStr, sizeof(bssidStr), "%02X:%02X:%02X:%02X:%02X:%02X", bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+    //     snprintf(strbuf_bssid, sizeof(strbuf_bssid), "%02X:%02X:%02X:%02X:%02X:%02X", bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
     // }
-    // char temp_str_buf[256];
-    // snprintf(temp_str_buf, sizeof(temp_str_buf), "SSID: %s\nRSSI: %d dBm\nChannel: %d\nBSSID: %s\nEncryption Type: %s", WiFi.SSID(idx).c_str(), WiFi.RSSI(idx), WiFi.channel(idx), bssidStr, get_wifi_encryption_type(WiFi.encryptionType(idx)));
+    // char strbuf[256];
+    // snprintf(strbuf, sizeof(strbuf), "SSID: %s\nRSSI: %d dBm\nChannel: %d\nBSSID: %s\nEncryption Type: %s", WiFi.SSID(idx).c_str(), WiFi.RSSI(idx), WiFi.channel(idx), strbuf_bssid, get_wifi_encryption_type(WiFi.encryptionType(idx)));
     // // --------------------------------------------------
-    char temp_str_buf[256];
-    snprintf(temp_str_buf, sizeof(temp_str_buf), "SSID: WiFi Network #%d\nRSSI: 12345 dBm\nChannel: 123\nBSSID: 12-34-56-78-89\nEncryption Type: ABC", idx);
+    char strbuf[256];
+    snprintf(strbuf, sizeof(strbuf), "SSID: WiFi Network #%d\nRSSI: 12345 dBm\nChannel: 123\nBSSID: 12-34-56-78-89\nEncryption Type: ABC", idx);
     // // --------------------------------------------------
 
-    lv_label_set_text(obj_scanaps_detail_cont_label, temp_str_buf);
+    lv_label_set_text(obj_scanaps_detail_cont_label, strbuf);
     if (obj_menu && obj_scanaps_detailpage)
     {
         lv_menu_set_page(obj_menu, obj_scanaps_detailpage);
@@ -138,9 +138,9 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
         //     lv_obj_t *obj_btn_item_ap = lv_btn_create(obj_scanaps_list);
         //     lv_obj_set_width(obj_btn_item_ap, lv_pct(100));
         //     lv_obj_t *obj_btn_item_ap_label = lv_label_create(obj_btn_item_ap);
-        //     char str_btn_item_ap_label[96];
-        //     snprintf(str_btn_item_ap_label, sizeof(str_btn_item_ap_label), "%s [%s] (%d dBm)", WiFi.SSID(idx).c_str(), get_wifi_encryption_type(WiFi.encryptionType(idx)), WiFi.RSSI(idx));
-        //     lv_label_set_text(obj_btn_item_ap_label, str_btn_item_ap_label);
+        //     char strbuf[96];
+        //     snprintf(strbuf, sizeof(strbuf), "%s [%s] (%d dBm)", WiFi.SSID(idx).c_str(), get_wifi_encryption_type(WiFi.encryptionType(idx)), WiFi.RSSI(idx));
+        //     lv_label_set_text(obj_btn_item_ap_label, strbuf);
         //     lv_obj_add_event_cb(obj_btn_item_ap, fn_apdetailpage_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
         // }
         // // --------------------------------------------------
@@ -151,16 +151,16 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
             lv_obj_t *obj_btn_item_ap = lv_btn_create(obj_scanaps_list);
             lv_obj_set_width(obj_btn_item_ap, lv_pct(100));
             lv_obj_t *obj_btn_item_ap_label = lv_label_create(obj_btn_item_ap);
-            char str_btn_item_ap_label[96];
-            snprintf(str_btn_item_ap_label, sizeof(str_btn_item_ap_label), "Wifi Network #%d [%s] (%d dBm)", idx, "Encryption Type", 12345);
-            lv_label_set_text(obj_btn_item_ap_label, str_btn_item_ap_label);
+            char strbuf[96];
+            snprintf(strbuf, sizeof(strbuf), "Wifi Network #%d [%s] (%d dBm)", idx, "Encryption Type", 12345);
+            lv_label_set_text(obj_btn_item_ap_label, strbuf);
             lv_obj_add_event_cb(obj_btn_item_ap, fn_apdetailpage_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
         }
         // // --------------------------------------------------
 
-        char temp_str_buf[64];
-        snprintf(temp_str_buf, sizeof(temp_str_buf), "Scan APs Status: %d found.", n_aps);
-        lv_label_set_text(obj_scanaps_status, temp_str_buf);
+        char strbuf[64];
+        snprintf(strbuf, sizeof(strbuf), "Scan APs Status: %d found.", n_aps);
+        lv_label_set_text(obj_scanaps_status, strbuf);
     }
 }
 
@@ -215,6 +215,8 @@ int main(int argc, char **argv)
     lv_obj_set_style_border_color(menu_header, lv_palette_main(LV_PALETTE_TEAL), 0);
 
     lv_obj_t *menu_back_btn = lv_menu_get_main_header_back_btn(obj_menu);
+    lv_obj_set_style_pad_hor(menu_back_btn, 4, 0);
+    lv_obj_set_style_pad_ver(menu_back_btn, 6, 0);
     lv_obj_t *menu_back_btn_text = lv_label_create(menu_back_btn);
     lv_label_set_text(menu_back_btn_text, "Back");
 
@@ -272,19 +274,30 @@ int main(int argc, char **argv)
     lv_label_set_text(obj_text, "This is the content of page 3");
 
     // ----- Main page -----
+    const int c_menubtnpadver = 15;
     lv_obj_t *main_page = lv_menu_page_create(obj_menu, HARDWARE);
-    obj_cont = lv_menu_cont_create(main_page);
+
+    obj_cont = lv_btn_create(main_page);
+    lv_obj_set_width(obj_cont, lv_pct(100));
+    lv_obj_set_style_pad_ver(obj_cont, c_menubtnpadver, 0);
     obj_text = lv_label_create(obj_cont);
     lv_label_set_text(obj_text, "Page 1 - Test Keyboard");
     lv_menu_set_load_page_event(obj_menu, obj_cont, obj_subpage_1);
-    obj_cont = lv_menu_cont_create(main_page);
+
+    obj_cont = lv_btn_create(main_page);
+    lv_obj_set_width(obj_cont, lv_pct(100));
+    lv_obj_set_style_pad_ver(obj_cont, c_menubtnpadver, 0);
     obj_text = lv_label_create(obj_cont);
     lv_label_set_text(obj_text, "Page 2 - Scan APs");
     lv_menu_set_load_page_event(obj_menu, obj_cont, obj_subpage_2);
-    obj_cont = lv_menu_cont_create(main_page);
+
+    obj_cont = lv_btn_create(main_page);
+    lv_obj_set_width(obj_cont, lv_pct(100));
+    lv_obj_set_style_pad_ver(obj_cont, c_menubtnpadver, 0);
     obj_text = lv_label_create(obj_cont);
     lv_label_set_text(obj_text, "Page 3 - None");
     lv_menu_set_load_page_event(obj_menu, obj_cont, obj_subpage_3);
+
     lv_menu_set_page(obj_menu, main_page);
     // ====================================================================================================
     // ====================================================================================================

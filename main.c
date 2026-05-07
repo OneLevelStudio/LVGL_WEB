@@ -107,6 +107,9 @@ static lv_obj_t *obj_wifiscan_btnscan_label;
 static lv_obj_t *obj_wifiscan_listwifi_cont;
 static lv_obj_t *obj_page_wifiinfo;
 static lv_obj_t *obj_wifiinfo_label;
+static lv_obj_t *obj_page_captiveportal;
+static lv_obj_t *obj_captiveportal_label;
+static String captiveportal_ap_ssid = "Free WiFi";
 // static const char *get_wifi_encryption_type(wifi_auth_mode_t auth_mode)
 // {
 //     switch (auth_mode)
@@ -138,6 +141,7 @@ static void fn_apdetailpage_eventcb(lv_event_t *evt)
     int idx = (int)(intptr_t)lv_event_get_user_data(evt);
 
     // // --------------------------------------------------
+    // captiveportal_ap_ssid = WiFi.SSID(idx);
     // uint8_t *bssid = WiFi.BSSID(idx);
     // char strbuf_bssid[18] = "";
     // if (bssid)
@@ -145,17 +149,14 @@ static void fn_apdetailpage_eventcb(lv_event_t *evt)
     //     snprintf(strbuf_bssid, sizeof(strbuf_bssid), "%02X:%02X:%02X:%02X:%02X:%02X", bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
     // }
     // char strbuf[256];
-    // snprintf(strbuf, sizeof(strbuf), "SSID: %s\nRSSI: %d dBm\nChannel: %d\nBSSID: %s\nEncryption Type: %s", WiFi.SSID(idx).c_str(), WiFi.RSSI(idx), WiFi.channel(idx), strbuf_bssid, get_wifi_encryption_type(WiFi.encryptionType(idx)));
+    // snprintf(strbuf, sizeof(strbuf), "SSID: %s\nRSSI: %d dBm\nChannel: %d\nBSSID: %s\nEncryption Type: %s", captiveportal_ap_ssid.c_str(), WiFi.RSSI(idx), WiFi.channel(idx), strbuf_bssid, get_wifi_encryption_type(WiFi.encryptionType(idx)));
     // // --------------------------------------------------
     char strbuf[256];
     snprintf(strbuf, sizeof(strbuf), "SSID: WiFi Network #%d\nRSSI: 12345 dBm\nChannel: 123\nBSSID: 12-34-56-78-89\nEncryption Type: ABC", idx);
     // // --------------------------------------------------
 
     lv_label_set_text(obj_wifiinfo_label, strbuf);
-    if (obj_menu && obj_page_wifiinfo)
-    {
-        lv_menu_set_page(obj_menu, obj_page_wifiinfo);
-    }
+    lv_menu_set_page(obj_menu, obj_page_wifiinfo);
 }
 static void fn_scanaps_eventcb(lv_event_t *evt)
 {
@@ -188,7 +189,7 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
         //     lv_obj_add_event_cb(obj_btn_item_ap, fn_apdetailpage_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
         // }
         // // --------------------------------------------------
-        usleep(1000000); // = delay(1000);
+        usleep(500000); // = delay(500);
         int n_aps = 10;
         for (int idx = 0; idx < n_aps; ++idx)
         {
@@ -205,6 +206,32 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
         char strbuf[64];
         snprintf(strbuf, sizeof(strbuf), "Status: %d AP(s) found", n_aps);
         lv_label_set_text(obj_wifiscan_btnscan_label, strbuf);
+    }
+}
+
+void handleCaptivePortal()
+{
+    String portal_html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body><h2>Captive Portal is working.</h2></body></html>";
+    webServer.send(200, "text/html", portal_html);
+}
+static void fn_captiveportal_eventcb(lv_event_t *evt)
+{
+    lv_event_code_t evt_code = lv_event_get_code(evt);
+    // obj_wifiinfo_btnattack clicked
+    if (evt_code == LV_EVENT_CLICKED)
+    {
+        lv_menu_set_page(obj_menu, obj_page_captiveportal);
+
+        // // --------------------------------------------------
+        // WiFi.mode(WIFI_AP);
+        // WiFi.disconnect();
+        // delay(100);
+        // WiFi.softAP(captiveportal_ap_ssid + " (Testing)");
+        // dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+        // webServer.on("/", handleCaptivePortal);
+        // webServer.onNotFound(handleCaptivePortal);
+        // webServer.begin();
+        // // --------------------------------------------------
     }
 }
 // ====================================================================================================
@@ -317,7 +344,13 @@ int main(int argc, char **argv)
     lv_obj_t *obj_wifiinfo_btnattack = lv_btn_create(obj_wifiscan_info_cont);
     lv_obj_add_style(obj_wifiinfo_btnattack, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     obj_text = lv_label_create(obj_wifiinfo_btnattack);
-    lv_label_set_text(obj_text, "Attack");
+    lv_label_set_text(obj_text, "Attack Captive Portal");
+    lv_obj_add_event_cb(obj_wifiinfo_btnattack, fn_captiveportal_eventcb, LV_EVENT_ALL, NULL);
+    obj_page_captiveportal = lv_menu_page_create(obj_menu, "Captive Portal");
+    lv_obj_t *obj_captiveportal_cont = lv_menu_cont_create(obj_page_captiveportal);
+    lv_obj_set_flex_flow(obj_captiveportal_cont, LV_FLEX_FLOW_COLUMN);
+    obj_captiveportal_label = lv_label_create(obj_captiveportal_cont);
+    lv_label_set_text(obj_captiveportal_label, "Captive Portal text should be here");
 
     // ----- Page: Keyboard Test -----
     lv_obj_t *obj_page_keyboardtest = lv_menu_page_create(obj_menu, "Keyboard Test");

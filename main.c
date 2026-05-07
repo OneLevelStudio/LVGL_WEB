@@ -240,7 +240,7 @@ static void fn_eviltwin_eventcb(lv_event_t *evt)
         // webServer.on("/", send_eviltwin);
         // webServer.onNotFound(send_eviltwin);
         // webServer.begin();
-        // lv_label_set_text(eviltwin_label, "Evil Twin '" + saved_ssid_for_eviltwin + "' deployed.");
+        // lv_label_set_text(eviltwin_label, ("Evil Twin '" + saved_ssid_for_eviltwin + "' deployed.").c_str());
         // // --------------------------------------------------
     }
 }

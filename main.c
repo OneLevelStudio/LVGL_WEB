@@ -233,9 +233,9 @@ static void fn_eviltwin_eventcb(lv_event_t *evt)
 
         // // --------------------------------------------------
         // WiFi.mode(WIFI_AP);
-        // WiFi.disconnect();
-        // delay(100);
+        // WiFi.softAPdisconnect(true);
         // WiFi.softAP(saved_ssid_for_eviltwin + " (Test)");
+        // dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
         // dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
         // webServer.on("/", send_eviltwin);
         // webServer.onNotFound(send_eviltwin);

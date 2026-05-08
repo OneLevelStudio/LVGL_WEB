@@ -87,7 +87,7 @@ void init_styles(void)
     lv_style_set_pad_bottom(&style_labelinfobox, 8);
 }
 
-// ---------- Page: Keyboard Test ----------
+// -------------------- Page: Keyboard Test --------------------
 static lv_obj_t *kbtest_txarea_result;
 static lv_obj_t *kbtest_txarea_input;
 static lv_obj_t *kbtest_keyboard;
@@ -112,13 +112,19 @@ static void fn_textinput_eventcb(lv_event_t *evt)
     }
 }
 
-// ---------- Page: WiFi Hijacking ----------
+// -------------------- Page: Targeted Attacks + Broadcast Attacks --------------------
 static lv_obj_t *page_wifiinfo;
-static lv_obj_t *page_eviltwin;
+static lv_obj_t *page_tgt_eviltwin;
+static lv_obj_t *page_tgt_deauth;
+static lv_obj_t *page_tgt_deautheviltwin;
+static lv_obj_t *page_brc_deauthall;
 static lv_obj_t *btn_wifiscan_label;
 static lv_obj_t *wifiscan_list;
 static lv_obj_t *wifiinfo_label;
-static lv_obj_t *eviltwin_label;
+static lv_obj_t *tgt_eviltwin_label;
+static lv_obj_t *tgt_deauth_label;
+static lv_obj_t *tgt_deautheviltwin_label;
+static lv_obj_t *brc_deauthall_label;
 // static String saved_ssid_for_eviltwin = "Free WiFi";
 // static const char *get_wifi_encryption_type(wifi_auth_mode_t auth_mode)
 // {
@@ -146,10 +152,9 @@ static lv_obj_t *eviltwin_label;
 //         return "UNK";
 //     }
 // }
-static void fn_apdetailpage_eventcb(lv_event_t *evt)
+static void fn_wifiinfo_eventcb(lv_event_t *evt)
 {
     int idx = (int)(intptr_t)lv_event_get_user_data(evt);
-
     // // --------------------------------------------------
     // saved_ssid_for_eviltwin = WiFi.SSID(idx);
     // uint8_t *bssid = WiFi.BSSID(idx);
@@ -164,11 +169,10 @@ static void fn_apdetailpage_eventcb(lv_event_t *evt)
     char strbuf[256];
     snprintf(strbuf, sizeof(strbuf), "SSID: WiFi Network #%d\nRSSI: 12345 dBm\nChannel: 123\nBSSID: 12-34-56-78-89\nEncryption Type: ABC", idx);
     // // --------------------------------------------------
-
     lv_label_set_text(wifiinfo_label, strbuf);
     lv_menu_set_page(obj_menu, page_wifiinfo);
 }
-static void fn_scanaps_eventcb(lv_event_t *evt)
+static void fn_wifiscan_eventcb(lv_event_t *evt)
 {
     lv_event_code_t evt_code = lv_event_get_code(evt);
     // btn_wifiscan clicked
@@ -177,7 +181,6 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
         lv_obj_clean(wifiscan_list);
         lv_label_set_text(btn_wifiscan_label, "Scanning...");
         lv_refr_now(NULL);
-
         // // --------------------------------------------------
         // WiFi.mode(WIFI_STA);
         // WiFi.disconnect();
@@ -196,7 +199,7 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
         //     char strbuf[96];
         //     snprintf(strbuf, sizeof(strbuf), "%s [%s] (%d dBm)", WiFi.SSID(idx).c_str(), get_wifi_encryption_type(WiFi.encryptionType(idx)), WiFi.RSSI(idx));
         //     lv_label_set_text(obj_btn_item_ap_label, strbuf);
-        //     lv_obj_add_event_cb(obj_btn_item_ap, fn_apdetailpage_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
+        //     lv_obj_add_event_cb(obj_btn_item_ap, fn_wifiinfo_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
         // }
         // // --------------------------------------------------
         int n_aps = 10;
@@ -208,10 +211,9 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
             char strbuf[96];
             snprintf(strbuf, sizeof(strbuf), "Dummy Wifi #%d", idx);
             lv_label_set_text(obj_btn_item_ap_label, strbuf);
-            lv_obj_add_event_cb(obj_btn_item_ap, fn_apdetailpage_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
+            lv_obj_add_event_cb(obj_btn_item_ap, fn_wifiinfo_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
         }
         // // --------------------------------------------------
-
         char strbuf[64];
         snprintf(strbuf, sizeof(strbuf), "Status: %d AP(s) found", n_aps);
         lv_label_set_text(btn_wifiscan_label, strbuf);
@@ -223,14 +225,13 @@ static void fn_scanaps_eventcb(lv_event_t *evt)
 //     String portal_html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body><h2>Evil Twin is working</h2></body></html>";
 //     webServer.send(200, "text/html", portal_html);
 // }
-static void fn_eviltwin_eventcb(lv_event_t *evt)
+static void fn_tgt_eviltwin_eventcb(lv_event_t *evt)
 {
     lv_event_code_t evt_code = lv_event_get_code(evt);
-    // btn_eviltwin clicked
+    // btn_tgt_eviltwin clicked
     if (evt_code == LV_EVENT_CLICKED)
     {
-        lv_menu_set_page(obj_menu, page_eviltwin);
-
+        lv_menu_set_page(obj_menu, page_tgt_eviltwin);
         // // --------------------------------------------------
         // WiFi.mode(WIFI_AP);
         // WiFi.softAPdisconnect(true);
@@ -240,8 +241,35 @@ static void fn_eviltwin_eventcb(lv_event_t *evt)
         // webServer.on("/", send_eviltwin);
         // webServer.onNotFound(send_eviltwin);
         // webServer.begin();
-        // lv_label_set_text(eviltwin_label, ("Evil Twin '" + saved_ssid_for_eviltwin + "' deployed.").c_str());
+        // lv_label_set_text(tgt_eviltwin_label, ("Evil Twin '" + saved_ssid_for_eviltwin + "' deployed.").c_str());
         // // --------------------------------------------------
+    }
+}
+static void fn_tgt_deauth_eventcb(lv_event_t *evt)
+{
+    lv_event_code_t evt_code = lv_event_get_code(evt);
+    // btn_tgt_deauth clicked
+    if (evt_code == LV_EVENT_CLICKED)
+    {
+        lv_menu_set_page(obj_menu, page_tgt_deauth);
+    }
+}
+static void fn_tgt_deautheviltwin_eventcb(lv_event_t *evt)
+{
+    lv_event_code_t evt_code = lv_event_get_code(evt);
+    // btn_tgt_deautheviltwin clicked
+    if (evt_code == LV_EVENT_CLICKED)
+    {
+        lv_menu_set_page(obj_menu, page_tgt_deautheviltwin);
+    }
+}
+static void fn_brc_deauthall_eventcb(lv_event_t *evt)
+{
+    lv_event_code_t evt_code = lv_event_get_code(evt);
+    // btn_brc_deauthall clicked
+    if (evt_code == LV_EVENT_CLICKED)
+    {
+        lv_menu_set_page(obj_menu, page_brc_deauthall);
     }
 }
 // ====================================================================================================
@@ -292,7 +320,7 @@ int main(int argc, char **argv)
     lv_obj_t *obj_cont;
     lv_obj_t *obj_text;
 
-    // ----- Menu & Header -----
+    // -------------------- Menu & Header --------------------
     obj_menu = lv_menu_create(lv_scr_act());
     lv_obj_set_size(obj_menu, 240, 320);
     lv_obj_set_style_bg_color(obj_menu, lv_color_hex(color_global_background), 0);
@@ -314,17 +342,17 @@ int main(int argc, char **argv)
     lv_label_set_text(menu_backbtn_label, "Back");
     lv_obj_set_style_text_color(menu_backbtn_label, lv_color_hex(color_header_backtext), 0);
 
-    // ----- Page: WiFi Hijacking -----
-    lv_obj_t *page_wifihijack = lv_menu_page_create(obj_menu, "Network Scanning");
-    obj_cont = lv_menu_cont_create(page_wifihijack);
+    // -------------------- Page: Targeted Attacks --------------------
+    lv_obj_t *page_targetedatks = lv_menu_page_create(obj_menu, "Network Scanning");
+    obj_cont = lv_menu_cont_create(page_targetedatks);
     lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
     lv_obj_t *btn_wifiscan = lv_btn_create(obj_cont);
     lv_obj_add_style(btn_wifiscan, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     btn_wifiscan_label = lv_label_create(btn_wifiscan);
     lv_label_set_text(btn_wifiscan_label, "Scan APs");
     lv_obj_center(btn_wifiscan_label);
-    lv_obj_add_event_cb(btn_wifiscan, fn_scanaps_eventcb, LV_EVENT_ALL, NULL);
-    lv_obj_t *wifiscan_list_wrapper = lv_menu_cont_create(page_wifihijack);
+    lv_obj_add_event_cb(btn_wifiscan, fn_wifiscan_eventcb, LV_EVENT_ALL, NULL);
+    lv_obj_t *wifiscan_list_wrapper = lv_menu_cont_create(page_targetedatks);
     lv_obj_set_style_pad_hor(wifiscan_list_wrapper, 8, 0);
     lv_obj_set_style_pad_ver(wifiscan_list_wrapper, 0, 0);
     wifiscan_list = lv_menu_cont_create(wifiscan_list_wrapper);
@@ -347,20 +375,75 @@ int main(int argc, char **argv)
     lv_label_set_long_mode(wifiinfo_label, LV_LABEL_LONG_WRAP);
     lv_obj_add_style(wifiinfo_label, &style_labelinfobox, 0);
     lv_label_set_text(wifiinfo_label, "[Init text] AP Info should be here");
-    lv_obj_t *btn_eviltwin = lv_btn_create(wifiinfo_cont);
-    lv_obj_add_style(btn_eviltwin, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
-    obj_text = lv_label_create(btn_eviltwin);
+    // Targeted Evil Twin
+    lv_obj_t *btn_tgt_eviltwin = lv_btn_create(wifiinfo_cont);
+    lv_obj_add_style(btn_tgt_eviltwin, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_text = lv_label_create(btn_tgt_eviltwin);
     lv_label_set_text(obj_text, "Deploy Evil Twin");
-    lv_obj_add_event_cb(btn_eviltwin, fn_eviltwin_eventcb, LV_EVENT_ALL, NULL);
-    page_eviltwin = lv_menu_page_create(obj_menu, "Evil Twin");
-    lv_obj_t *eviltwin_cont = lv_menu_cont_create(page_eviltwin);
-    lv_obj_set_flex_flow(eviltwin_cont, LV_FLEX_FLOW_COLUMN);
-    eviltwin_label = lv_label_create(eviltwin_cont);
-    lv_label_set_text(eviltwin_label, "[Init text] Evil Twin should be here");
-    lv_obj_add_style(eviltwin_label, &style_labelinfobox, 0);
-    lv_label_set_long_mode(eviltwin_label, LV_LABEL_LONG_WRAP);
+    lv_obj_add_event_cb(btn_tgt_eviltwin, fn_tgt_eviltwin_eventcb, LV_EVENT_ALL, NULL);
+    page_tgt_eviltwin = lv_menu_page_create(obj_menu, "Evil Twin");
+    obj_cont = lv_menu_cont_create(page_tgt_eviltwin);
+    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
+    tgt_eviltwin_label = lv_label_create(obj_cont);
+    lv_label_set_text(tgt_eviltwin_label, "[Init text] Evil Twin should be here");
+    lv_obj_add_style(tgt_eviltwin_label, &style_labelinfobox, 0);
+    lv_label_set_long_mode(tgt_eviltwin_label, LV_LABEL_LONG_WRAP);
+    // Targeted Deauth
+    lv_obj_t *btn_tgt_deauth = lv_btn_create(wifiinfo_cont);
+    lv_obj_add_style(btn_tgt_deauth, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_text = lv_label_create(btn_tgt_deauth);
+    lv_label_set_text(obj_text, "Deploy Deauth Attack");
+    lv_obj_add_event_cb(btn_tgt_deauth, fn_tgt_deauth_eventcb, LV_EVENT_ALL, NULL);
+    page_tgt_deauth = lv_menu_page_create(obj_menu, "Targeted Deauth");
+    obj_cont = lv_menu_cont_create(page_tgt_deauth);
+    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
+    tgt_deauth_label = lv_label_create(obj_cont);
+    lv_label_set_text(tgt_deauth_label, "[Init text] Targeted Deauth should be here");
+    lv_obj_add_style(tgt_deauth_label, &style_labelinfobox, 0);
+    lv_label_set_long_mode(tgt_deauth_label, LV_LABEL_LONG_WRAP);
+    // Combo Deauth + Evil Twin
+    lv_obj_t *btn_tgt_deautheviltwin = lv_btn_create(wifiinfo_cont);
+    lv_obj_add_style(btn_tgt_deautheviltwin, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_text = lv_label_create(btn_tgt_deautheviltwin);
+    lv_label_set_text(obj_text, "Deauth + Evil Twin");
+    lv_obj_add_event_cb(btn_tgt_deautheviltwin, fn_tgt_deautheviltwin_eventcb, LV_EVENT_ALL, NULL);
+    page_tgt_deautheviltwin = lv_menu_page_create(obj_menu, "Deauth + Evil Twin");
+    obj_cont = lv_menu_cont_create(page_tgt_deautheviltwin);
+    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
+    tgt_deautheviltwin_label = lv_label_create(obj_cont);
+    lv_label_set_text(tgt_deautheviltwin_label, "[Init text] Deauth + Evil Twin should be here");
+    lv_obj_add_style(tgt_deautheviltwin_label, &style_labelinfobox, 0);
+    lv_label_set_long_mode(tgt_deautheviltwin_label, LV_LABEL_LONG_WRAP);
 
-    // ----- Page: Keyboard Test -----
+    // -------------------- Page: Broadcast Attacks --------------------
+    lv_obj_t *page_broadcastatks = lv_menu_page_create(obj_menu, "Broadcast Attacks");
+    lv_obj_t *brc_cont = lv_menu_cont_create(page_broadcastatks);
+    lv_obj_set_flex_flow(brc_cont, LV_FLEX_FLOW_COLUMN);
+    // Deauth All
+    lv_obj_t *btn_brc_deauthall = lv_btn_create(brc_cont);
+    lv_obj_add_style(btn_brc_deauthall, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_text = lv_label_create(btn_brc_deauthall);
+    lv_label_set_text(obj_text, "Deauth All Networks");
+    lv_obj_add_event_cb(btn_brc_deauthall, fn_brc_deauthall_eventcb, LV_EVENT_ALL, NULL);
+    page_brc_deauthall = lv_menu_page_create(obj_menu, "Deauth All 2.4GHz");
+    obj_cont = lv_menu_cont_create(page_brc_deauthall);
+    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
+    brc_deauthall_label = lv_label_create(obj_cont);
+    lv_label_set_text(brc_deauthall_label, "[Init text] Deauth All should be here");
+    lv_obj_add_style(brc_deauthall_label, &style_labelinfobox, 0);
+    lv_label_set_long_mode(brc_deauthall_label, LV_LABEL_LONG_WRAP);
+    // SSID Spam 1
+    lv_obj_t *btn_brc_ssidspam1 = lv_btn_create(brc_cont);
+    lv_obj_add_style(btn_brc_ssidspam1, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_text = lv_label_create(btn_brc_ssidspam1);
+    lv_label_set_text(obj_text, "SSID Spam List 1");
+    // SSID Spam 2
+    lv_obj_t *btn_brc_ssidspam2 = lv_btn_create(brc_cont);
+    lv_obj_add_style(btn_brc_ssidspam2, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_text = lv_label_create(btn_brc_ssidspam2);
+    lv_label_set_text(obj_text, "SSID Spam List 2");
+
+    // -------------------- Page: Keyboard Test --------------------
     lv_obj_t *page_keyboardtest = lv_menu_page_create(obj_menu, "Keyboard Test");
     obj_cont = lv_menu_cont_create(page_keyboardtest);
     lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
@@ -379,7 +462,7 @@ int main(int argc, char **argv)
     lv_obj_add_flag(kbtest_keyboard, LV_OBJ_FLAG_HIDDEN); // Hide keyboard by default
     lv_keyboard_set_textarea(kbtest_keyboard, kbtest_txarea_input);
 
-    // ----- Page: About -----
+    // -------------------- Page: About --------------------
     lv_obj_t *page_about = lv_menu_page_create(obj_menu, "About");
     obj_cont = lv_menu_cont_create(page_about);
     obj_text = lv_label_create(obj_cont);
@@ -387,7 +470,7 @@ int main(int argc, char **argv)
     lv_obj_add_style(obj_text, &style_labelinfobox, 0);
     lv_label_set_text(obj_text, "Firmware V1.0");
 
-    // ----- Page: Main page -----
+    // -------------------- Page: Main page --------------------
     lv_obj_t *page_main = lv_menu_page_create(obj_menu, HARDWARE);
     lv_obj_set_style_pad_ver(page_main, 8, 0);
     lv_obj_set_style_pad_hor(page_main, 8, 0);
@@ -395,8 +478,13 @@ int main(int argc, char **argv)
     obj_cont = lv_btn_create(page_main);
     lv_obj_add_style(obj_cont, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     obj_text = lv_label_create(obj_cont);
-    lv_label_set_text(obj_text, "WiFi Hijacking");
-    lv_menu_set_load_page_event(obj_menu, obj_cont, page_wifihijack);
+    lv_label_set_text(obj_text, "Targeted Attacks");
+    lv_menu_set_load_page_event(obj_menu, obj_cont, page_targetedatks);
+    obj_cont = lv_btn_create(page_main);
+    lv_obj_add_style(obj_cont, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_text = lv_label_create(obj_cont);
+    lv_label_set_text(obj_text, "Broadcast Attacks");
+    lv_menu_set_load_page_event(obj_menu, obj_cont, page_broadcastatks);
     obj_cont = lv_btn_create(page_main);
     lv_obj_add_style(obj_cont, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     obj_text = lv_label_create(obj_cont);

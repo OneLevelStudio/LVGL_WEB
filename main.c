@@ -113,64 +113,37 @@ static void fn_textinput_eventcb(lv_event_t *evt)
 }
 
 // -------------------- Page: Targeted Attacks + Broadcast Attacks --------------------
+// static String current_processing = "NONE";
+// static String saveddatafortgtatk_ssid = "Free WiFi";
+// static uint8_t saveddatafortgtatk_channel = 1;
+// static uint8_t saveddatafortgtatk_bssid[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 static lv_obj_t *page_wifiinfo;
 static lv_obj_t *page_tgt_eviltwin;
 static lv_obj_t *page_tgt_deauth;
 static lv_obj_t *page_tgt_deautheviltwin;
-static lv_obj_t *page_brc_deauthall;
+static lv_obj_t *page_brc_ssidspam1;
+static lv_obj_t *page_brc_ssidspam2;
 static lv_obj_t *btn_wifiscan_label;
 static lv_obj_t *wifiscan_list;
 static lv_obj_t *wifiinfo_label;
 static lv_obj_t *tgt_eviltwin_label;
 static lv_obj_t *tgt_deauth_label;
 static lv_obj_t *tgt_deautheviltwin_label;
-static lv_obj_t *brc_deauthall_label;
-// static String saved_ssid_for_eviltwin = "Free WiFi";
-// static const char *get_wifi_encryption_type(wifi_auth_mode_t auth_mode)
-// {
-//     switch (auth_mode)
-//     {
-//     case WIFI_AUTH_OPEN:
-//         return "OPEN";
-//     case WIFI_AUTH_WEP:
-//         return "WEP";
-//     case WIFI_AUTH_WPA_PSK:
-//         return "WPA";
-//     case WIFI_AUTH_WPA2_PSK:
-//         return "WPA2";
-//     case WIFI_AUTH_WPA_WPA2_PSK:
-//         return "WPA+WPA2";
-//     case WIFI_AUTH_WPA2_ENTERPRISE:
-//         return "WPA2-EAP";
-//     case WIFI_AUTH_WPA3_PSK:
-//         return "WPA3";
-//     case WIFI_AUTH_WPA2_WPA3_PSK:
-//         return "WPA2+WPA3";
-//     case WIFI_AUTH_WAPI_PSK:
-//         return "WAPI";
-//     default:
-//         return "UNK";
-//     }
-// }
+static lv_obj_t *brc_ssidspam1_label;
+static lv_obj_t *brc_ssidspam2_label;
 static void fn_wifiinfo_eventcb(lv_event_t *evt)
 {
-    int idx = (int)(intptr_t)lv_event_get_user_data(evt);
-    // // --------------------------------------------------
-    // saved_ssid_for_eviltwin = WiFi.SSID(idx);
-    // uint8_t *bssid = WiFi.BSSID(idx);
-    // char strbuf_bssid[18] = "";
-    // if (bssid)
-    // {
-    //     snprintf(strbuf_bssid, sizeof(strbuf_bssid), "%02X:%02X:%02X:%02X:%02X:%02X", bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
-    // }
-    // char strbuf[256];
-    // snprintf(strbuf, sizeof(strbuf), "SSID: %s\nRSSI: %d dBm\nChannel: %d\nBSSID: %s\nEncryption Type: %s", saved_ssid_for_eviltwin.c_str(), WiFi.RSSI(idx), WiFi.channel(idx), strbuf_bssid, get_wifi_encryption_type(WiFi.encryptionType(idx)));
-    // // --------------------------------------------------
-    char strbuf[256];
-    snprintf(strbuf, sizeof(strbuf), "SSID: WiFi Network #%d\nRSSI: 12345 dBm\nChannel: 123\nBSSID: 12-34-56-78-89\nEncryption Type: ABC", idx);
-    // // --------------------------------------------------
-    lv_label_set_text(wifiinfo_label, strbuf);
     lv_menu_set_page(obj_menu, page_wifiinfo);
+    // // // --------------------------------------------------
+    // int idx = (int)(intptr_t)lv_event_get_user_data(evt);
+    // saveddatafortgtatk_ssid = WiFi.SSID(idx);             // Save data for later use
+    // saveddatafortgtatk_channel = WiFi.channel(idx);       // Save data for later use
+    // memcpy(saveddatafortgtatk_bssid, WiFi.BSSID(idx), 6); // Save data for later use
+    // // Label
+    // char strbuf[256];
+    // snprintf(strbuf, sizeof(strbuf), "SSID: %s\nRSSI: %d dBm\nChannel: %d\nBSSID: %s\nEncryption Type: %s", saveddatafortgtatk_ssid.c_str(), WiFi.RSSI(idx), saveddatafortgtatk_channel, get_mac_address_string(saveddatafortgtatk_bssid).c_str(), get_wifi_encryption_type(WiFi.encryptionType(idx)));
+    // lv_label_set_text(wifiinfo_label, strbuf);
+    // // // --------------------------------------------------
 }
 static void fn_wifiscan_eventcb(lv_event_t *evt)
 {
@@ -181,50 +154,46 @@ static void fn_wifiscan_eventcb(lv_event_t *evt)
         lv_obj_clean(wifiscan_list);
         lv_label_set_text(btn_wifiscan_label, "Scanning...");
         lv_refr_now(NULL);
-        // // --------------------------------------------------
+        // // // --------------------------------------------------
+        // wifi_disconnect_all();
         // WiFi.mode(WIFI_STA);
-        // WiFi.disconnect();
-        // delay(100);
         // int n_aps = WiFi.scanNetworks(false, true); // (async, show_hidden)
         // if (n_aps < 0)
         // {
         //     lv_label_set_text(btn_wifiscan_label, "Status: Failed");
         //     return;
         // }
+        // if (n_aps >= 10) // 🍌 Maximum displayed APs
+        //     n_aps = 10;
         // for (int idx = 0; idx < n_aps; ++idx)
         // {
         //     lv_obj_t *obj_btn_item_ap = lv_btn_create(wifiscan_list);
         //     lv_obj_add_style(obj_btn_item_ap, &style_buttonsmall, LV_PART_MAIN | LV_STATE_DEFAULT);
         //     lv_obj_t *obj_btn_item_ap_label = lv_label_create(obj_btn_item_ap);
-        //     char strbuf[96];
+        //     char strbuf[64];
         //     snprintf(strbuf, sizeof(strbuf), "%s [%s] (%d dBm)", WiFi.SSID(idx).c_str(), get_wifi_encryption_type(WiFi.encryptionType(idx)), WiFi.RSSI(idx));
         //     lv_label_set_text(obj_btn_item_ap_label, strbuf);
         //     lv_obj_add_event_cb(obj_btn_item_ap, fn_wifiinfo_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
         // }
-        // // --------------------------------------------------
+        // // // --------------------------------------------------
         int n_aps = 10;
         for (int idx = 0; idx < n_aps; ++idx)
         {
             lv_obj_t *obj_btn_item_ap = lv_btn_create(wifiscan_list);
             lv_obj_add_style(obj_btn_item_ap, &style_buttonsmall, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_t *obj_btn_item_ap_label = lv_label_create(obj_btn_item_ap);
-            char strbuf[96];
+            char strbuf[64];
             snprintf(strbuf, sizeof(strbuf), "Dummy Wifi #%d", idx);
             lv_label_set_text(obj_btn_item_ap_label, strbuf);
             lv_obj_add_event_cb(obj_btn_item_ap, fn_wifiinfo_eventcb, LV_EVENT_CLICKED, (void *)(intptr_t)idx);
         }
-        // // --------------------------------------------------
+        // // // --------------------------------------------------
         char strbuf[64];
         snprintf(strbuf, sizeof(strbuf), "Status: %d AP(s) found", n_aps);
         lv_label_set_text(btn_wifiscan_label, strbuf);
     }
 }
 
-// void send_eviltwin()
-// {
-//     String portal_html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body><h2>Evil Twin is working</h2></body></html>";
-//     webServer.send(200, "text/html", portal_html);
-// }
 static void fn_tgt_eviltwin_eventcb(lv_event_t *evt)
 {
     lv_event_code_t evt_code = lv_event_get_code(evt);
@@ -232,17 +201,17 @@ static void fn_tgt_eviltwin_eventcb(lv_event_t *evt)
     if (evt_code == LV_EVENT_CLICKED)
     {
         lv_menu_set_page(obj_menu, page_tgt_eviltwin);
-        // // --------------------------------------------------
+        // // // --------------------------------------------------
+        // current_processing = "TGT_EVILTWIN";
+        // wifi_disconnect_all();
         // WiFi.mode(WIFI_AP);
-        // WiFi.softAPdisconnect(true);
-        // WiFi.softAP(saved_ssid_for_eviltwin + " (Test)");
-        // dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-        // dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
-        // webServer.on("/", send_eviltwin);
-        // webServer.onNotFound(send_eviltwin);
-        // webServer.begin();
-        // lv_label_set_text(tgt_eviltwin_label, ("Evil Twin '" + saved_ssid_for_eviltwin + "' deployed.").c_str());
-        // // --------------------------------------------------
+        // String tmp_eviltwin_ssid = saveddatafortgtatk_ssid + " (Free)";
+        // start_eviltwin(saveddatafortgtatk_channel, saveddatafortgtatk_bssid, tmp_eviltwin_ssid);
+        // // Label
+        // char strbuf[256];
+        // snprintf(strbuf, sizeof(strbuf), ">>> Evil Twin:\nSSID: %s\nChannel: %d\nBSSID: %s", tmp_eviltwin_ssid.c_str(), saveddatafortgtatk_channel, get_mac_address_string(saveddatafortgtatk_bssid).c_str());
+        // lv_label_set_text(tgt_eviltwin_label, strbuf);
+        // // // --------------------------------------------------
     }
 }
 static void fn_tgt_deauth_eventcb(lv_event_t *evt)
@@ -252,6 +221,16 @@ static void fn_tgt_deauth_eventcb(lv_event_t *evt)
     if (evt_code == LV_EVENT_CLICKED)
     {
         lv_menu_set_page(obj_menu, page_tgt_deauth);
+        // // // --------------------------------------------------
+        // current_processing = "TGT_DEAUTH";
+        // wifi_disconnect_all();
+        // WiFi.mode(WIFI_AP);
+        // start_deauth(saveddatafortgtatk_channel, saveddatafortgtatk_bssid);
+        // // Label
+        // char strbuf[256];
+        // snprintf(strbuf, sizeof(strbuf), ">>> Deauth:\nSSID: %s\nChannel: %d\nBSSID: %s", saveddatafortgtatk_ssid.c_str(), saveddatafortgtatk_channel, get_mac_address_string(saveddatafortgtatk_bssid).c_str());
+        // lv_label_set_text(tgt_deauth_label, strbuf);
+        // // // --------------------------------------------------
     }
 }
 static void fn_tgt_deautheviltwin_eventcb(lv_event_t *evt)
@@ -261,15 +240,54 @@ static void fn_tgt_deautheviltwin_eventcb(lv_event_t *evt)
     if (evt_code == LV_EVENT_CLICKED)
     {
         lv_menu_set_page(obj_menu, page_tgt_deautheviltwin);
+        // // // --------------------------------------------------
+        // current_processing = "TGT_DEAUTHEVILTWIN";
+        // wifi_disconnect_all();
+        // WiFi.mode(WIFI_AP);
+        // // Change the evil twin's bssid's last digit, if not, the evil twin is also affected by the deauth
+        // uint8_t tmp_eviltwin_bssid[6];
+        // memcpy(tmp_eviltwin_bssid, saveddatafortgtatk_bssid, 6);
+        // tmp_eviltwin_bssid[5] += (tmp_eviltwin_bssid[5] < 0xFF) ? 1 : -1;
+        // // Deauth + Evil Twin
+        // String tmp_eviltwin_ssid = saveddatafortgtatk_ssid + " (Free)";
+        // start_eviltwin(saveddatafortgtatk_channel, tmp_eviltwin_bssid, tmp_eviltwin_ssid);
+        // start_deauth(saveddatafortgtatk_channel, saveddatafortgtatk_bssid);
+        // // Label
+        // char strbuf[256];
+        // snprintf(strbuf, sizeof(strbuf), ">>> Deauth + Evil Twin simultaneously:\n\nDeauth:\nSSID: %s\nChannel: %d\nBSSID: %s\n\nEvil Twin:\nSSID: %s\nChannel: %d\nBSSID: %s", saveddatafortgtatk_ssid.c_str(), saveddatafortgtatk_channel, get_mac_address_string(saveddatafortgtatk_bssid).c_str(), tmp_eviltwin_ssid.c_str(), saveddatafortgtatk_channel, get_mac_address_string(tmp_eviltwin_bssid).c_str());
+        // lv_label_set_text(tgt_deautheviltwin_label, strbuf);
+        // // // --------------------------------------------------
     }
 }
-static void fn_brc_deauthall_eventcb(lv_event_t *evt)
+static void fn_brc_ssidspam1_eventcb(lv_event_t *evt)
 {
     lv_event_code_t evt_code = lv_event_get_code(evt);
-    // btn_brc_deauthall clicked
+    // btn_brc_ssidspam1 clicked
     if (evt_code == LV_EVENT_CLICKED)
     {
-        lv_menu_set_page(obj_menu, page_brc_deauthall);
+        lv_menu_set_page(obj_menu, page_brc_ssidspam1);
+        // // // --------------------------------------------------
+        // current_processing = "BRC_SSIDSPAM1";
+        // wifi_disconnect_all();
+        // WiFi.mode(WIFI_AP);
+        // // Label
+        // lv_label_set_text(brc_ssidspam1_label, "SSID Spam List 1 deployed.");
+        // // // --------------------------------------------------
+    }
+}
+static void fn_brc_ssidspam2_eventcb(lv_event_t *evt)
+{
+    lv_event_code_t evt_code = lv_event_get_code(evt);
+    // btn_brc_ssidspam2 clicked
+    if (evt_code == LV_EVENT_CLICKED)
+    {
+        lv_menu_set_page(obj_menu, page_brc_ssidspam2);
+        // // // --------------------------------------------------
+        // current_processing = "BRC_SSIDSPAM2";
+        // // Not implemented yet 🍌🍌🍌🍌🍌🍌🍌🍌🍌🍌
+        // // Label
+        // lv_label_set_text(brc_ssidspam2_label, "SSID Spam List 2 deployed.");
+        // // // --------------------------------------------------
     }
 }
 // ====================================================================================================
@@ -375,19 +393,6 @@ int main(int argc, char **argv)
     lv_label_set_long_mode(wifiinfo_label, LV_LABEL_LONG_WRAP);
     lv_obj_add_style(wifiinfo_label, &style_labelinfobox, 0);
     lv_label_set_text(wifiinfo_label, "[Init text] AP Info should be here");
-    // Targeted Evil Twin
-    lv_obj_t *btn_tgt_eviltwin = lv_btn_create(wifiinfo_cont);
-    lv_obj_add_style(btn_tgt_eviltwin, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
-    obj_text = lv_label_create(btn_tgt_eviltwin);
-    lv_label_set_text(obj_text, "Deploy Evil Twin");
-    lv_obj_add_event_cb(btn_tgt_eviltwin, fn_tgt_eviltwin_eventcb, LV_EVENT_ALL, NULL);
-    page_tgt_eviltwin = lv_menu_page_create(obj_menu, "Evil Twin");
-    obj_cont = lv_menu_cont_create(page_tgt_eviltwin);
-    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
-    tgt_eviltwin_label = lv_label_create(obj_cont);
-    lv_label_set_text(tgt_eviltwin_label, "[Init text] Evil Twin should be here");
-    lv_obj_add_style(tgt_eviltwin_label, &style_labelinfobox, 0);
-    lv_label_set_long_mode(tgt_eviltwin_label, LV_LABEL_LONG_WRAP);
     // Targeted Deauth
     lv_obj_t *btn_tgt_deauth = lv_btn_create(wifiinfo_cont);
     lv_obj_add_style(btn_tgt_deauth, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -401,6 +406,19 @@ int main(int argc, char **argv)
     lv_label_set_text(tgt_deauth_label, "[Init text] Targeted Deauth should be here");
     lv_obj_add_style(tgt_deauth_label, &style_labelinfobox, 0);
     lv_label_set_long_mode(tgt_deauth_label, LV_LABEL_LONG_WRAP);
+    // Targeted Evil Twin
+    lv_obj_t *btn_tgt_eviltwin = lv_btn_create(wifiinfo_cont);
+    lv_obj_add_style(btn_tgt_eviltwin, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
+    obj_text = lv_label_create(btn_tgt_eviltwin);
+    lv_label_set_text(obj_text, "Deploy Evil Twin");
+    lv_obj_add_event_cb(btn_tgt_eviltwin, fn_tgt_eviltwin_eventcb, LV_EVENT_ALL, NULL);
+    page_tgt_eviltwin = lv_menu_page_create(obj_menu, "Evil Twin");
+    obj_cont = lv_menu_cont_create(page_tgt_eviltwin);
+    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
+    tgt_eviltwin_label = lv_label_create(obj_cont);
+    lv_label_set_text(tgt_eviltwin_label, "[Init text] Evil Twin should be here");
+    lv_obj_add_style(tgt_eviltwin_label, &style_labelinfobox, 0);
+    lv_label_set_long_mode(tgt_eviltwin_label, LV_LABEL_LONG_WRAP);
     // Combo Deauth + Evil Twin
     lv_obj_t *btn_tgt_deautheviltwin = lv_btn_create(wifiinfo_cont);
     lv_obj_add_style(btn_tgt_deautheviltwin, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -419,29 +437,32 @@ int main(int argc, char **argv)
     lv_obj_t *page_broadcastatks = lv_menu_page_create(obj_menu, "Broadcast Attacks");
     lv_obj_t *brc_cont = lv_menu_cont_create(page_broadcastatks);
     lv_obj_set_flex_flow(brc_cont, LV_FLEX_FLOW_COLUMN);
-    // Deauth All
-    lv_obj_t *btn_brc_deauthall = lv_btn_create(brc_cont);
-    lv_obj_add_style(btn_brc_deauthall, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
-    obj_text = lv_label_create(btn_brc_deauthall);
-    lv_label_set_text(obj_text, "Deauth All Networks");
-    lv_obj_add_event_cb(btn_brc_deauthall, fn_brc_deauthall_eventcb, LV_EVENT_ALL, NULL);
-    page_brc_deauthall = lv_menu_page_create(obj_menu, "Deauth All 2.4GHz");
-    obj_cont = lv_menu_cont_create(page_brc_deauthall);
-    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
-    brc_deauthall_label = lv_label_create(obj_cont);
-    lv_label_set_text(brc_deauthall_label, "[Init text] Deauth All should be here");
-    lv_obj_add_style(brc_deauthall_label, &style_labelinfobox, 0);
-    lv_label_set_long_mode(brc_deauthall_label, LV_LABEL_LONG_WRAP);
     // SSID Spam 1
     lv_obj_t *btn_brc_ssidspam1 = lv_btn_create(brc_cont);
     lv_obj_add_style(btn_brc_ssidspam1, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     obj_text = lv_label_create(btn_brc_ssidspam1);
     lv_label_set_text(obj_text, "SSID Spam List 1");
+    lv_obj_add_event_cb(btn_brc_ssidspam1, fn_brc_ssidspam1_eventcb, LV_EVENT_ALL, NULL);
+    page_brc_ssidspam1 = lv_menu_page_create(obj_menu, "SSID Spam List 1");
+    obj_cont = lv_menu_cont_create(page_brc_ssidspam1);
+    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
+    brc_ssidspam1_label = lv_label_create(obj_cont);
+    lv_label_set_text(brc_ssidspam1_label, "[Init text] SSID Spam List 1 should be here");
+    lv_obj_add_style(brc_ssidspam1_label, &style_labelinfobox, 0);
+    lv_label_set_long_mode(brc_ssidspam1_label, LV_LABEL_LONG_WRAP);
     // SSID Spam 2
     lv_obj_t *btn_brc_ssidspam2 = lv_btn_create(brc_cont);
     lv_obj_add_style(btn_brc_ssidspam2, &style_buttonlarge, LV_PART_MAIN | LV_STATE_DEFAULT);
     obj_text = lv_label_create(btn_brc_ssidspam2);
     lv_label_set_text(obj_text, "SSID Spam List 2");
+    lv_obj_add_event_cb(btn_brc_ssidspam2, fn_brc_ssidspam2_eventcb, LV_EVENT_ALL, NULL);
+    page_brc_ssidspam2 = lv_menu_page_create(obj_menu, "SSID Spam List 2");
+    obj_cont = lv_menu_cont_create(page_brc_ssidspam2);
+    lv_obj_set_flex_flow(obj_cont, LV_FLEX_FLOW_COLUMN);
+    brc_ssidspam2_label = lv_label_create(obj_cont);
+    lv_label_set_text(brc_ssidspam2_label, "[Init text] SSID Spam List 2 should be here");
+    lv_obj_add_style(brc_ssidspam2_label, &style_labelinfobox, 0);
+    lv_label_set_long_mode(brc_ssidspam2_label, LV_LABEL_LONG_WRAP);
 
     // -------------------- Page: Keyboard Test --------------------
     lv_obj_t *page_keyboardtest = lv_menu_page_create(obj_menu, "Keyboard Test");
@@ -468,10 +489,12 @@ int main(int argc, char **argv)
     obj_text = lv_label_create(obj_cont);
     lv_label_set_long_mode(obj_text, LV_LABEL_LONG_WRAP);
     lv_obj_add_style(obj_text, &style_labelinfobox, 0);
-    lv_label_set_text(obj_text, "Firmware V1.0");
+    char strbuf[256];
+    snprintf(strbuf, sizeof(strbuf), "BlackWhale Firmware V1.0\nHardware: %s", HARDWARE);
+    lv_label_set_text(obj_text, strbuf);
 
     // -------------------- Page: Main page --------------------
-    lv_obj_t *page_main = lv_menu_page_create(obj_menu, HARDWARE);
+    lv_obj_t *page_main = lv_menu_page_create(obj_menu, "BlackWhale");
     lv_obj_set_style_pad_ver(page_main, 8, 0);
     lv_obj_set_style_pad_hor(page_main, 8, 0);
     lv_obj_set_style_pad_row(page_main, 8, LV_PART_MAIN);
